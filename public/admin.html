@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration - Membres</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-page bg-white font-texte text-encre antialiased">
+  <header class="admin-topbar border-t-8 border-rouge bg-rouge-pale">
+    <div class="mx-auto max-w-6xl px-5 py-8">
+      <div class="admin-header-inner">
+        <div class="admin-brand">
+          <span class="admin-kicker">REGISTRE FAMILIAL · ESPACE PRIVÉ</span>
+          <h1 class="font-titre text-3xl text-rouge-fonce sm:text-4xl">Administration</h1>
+        </div>
+        <nav class="admin-header-actions" aria-label="Actions d’administration">
+          <a href="index.html" class="admin-back-link">Retour au formulaire</a>
+          <button id="deconnexion" class="admin-logout-button hidden" type="button">Déconnexion</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main mx-auto max-w-6xl px-5 py-8">
+    <section id="login-section" class="google-card mx-auto max-w-sm p-5">
+      <div class="mb-4 text-center">
+        <div class="google-badge mx-auto mb-3">A</div>
+        <h2 class="google-title text-2xl">Connexion admin</h2>
+        <p class="google-subtitle">Accès réservé à l’administrateur.</p>
+      </div>
+
+      <form id="login-form" class="google-form space-y-4">
+        <div>
+          <label for="username" class="google-label">Nom d’utilisateur</label>
+          <input id="username" name="username" type="text" class="google-input" value="admin" required>
+        </div>
+
+        <div>
+          <label for="password" class="google-label">Mot de passe</label>
+          <input id="password" name="password" type="password" class="google-input" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="google-button">
+          Se connecter
+        </button>
+      </form>
+
+      <div id="login-erreur" class="google-error mt-3 hidden"></div>
+    </section>
+
+    <section id="admin-content" class="hidden">
+      <div class="dashboard-wrap">
+        <div class="dashboard-heading">
+          <div>
+            <p class="dashboard-eyebrow">VUE D’ENSEMBLE</p>
+            <h2 class="dashboard-title">Tableau de bord</h2>
+            <p class="dashboard-description">Suivi des membres enregistrés dans la famille.</p>
+          </div>
+          <button id="actualiser" class="dashboard-refresh" type="button">Actualiser</button>
+        </div>
+
+        <div id="erreur" class="dashboard-error hidden" role="alert"></div>
+        <div id="chargeur" class="dashboard-loading" role="status">Chargement des membres…</div>
+
+        <div class="dashboard-metrics" aria-label="Indicateurs des membres">
+          <article class="metric-card metric-card--total">
+            <span class="metric-label">Membres inscrits</span>
+            <strong id="metric-total" class="metric-value">0</strong>
+            <span class="metric-note">Total dans le registre</span>
+          </article>
+          <article class="metric-card metric-card--women">
+            <span class="metric-label">Femmes</span>
+            <strong id="metric-femmes" class="metric-value">0</strong>
+            <span class="metric-note">Membres féminins</span>
+          </article>
+          <article class="metric-card metric-card--men">
+            <span class="metric-label">Hommes</span>
+            <strong id="metric-hommes" class="metric-value">0</strong>
+            <span class="metric-note">Membres masculins</span>
+          </article>
+          <article class="metric-card metric-card--month">
+            <span class="metric-label">Ce mois-ci</span>
+            <strong id="metric-mois" class="metric-value">0</strong>
+            <span class="metric-note">Nouvelles inscriptions</span>
+          </article>
+        </div>
+
+        <div class="dashboard-insights">
+          <section class="dashboard-panel" aria-labelledby="repartition-titre">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-eyebrow">COMPOSITION</p>
+                <h3 id="repartition-titre">Répartition des membres</h3>
+              </div>
+              <span id="ratio-total" class="panel-total">0 au total</span>
+            </div>
+            <div class="ratio-track" aria-label="Répartition femmes et hommes">
+              <span id="ratio-femmes" class="ratio-segment ratio-segment--women"></span>
+              <span id="ratio-hommes" class="ratio-segment ratio-segment--men"></span>
+            </div>
+            <div class="ratio-legend">
+              <span><i class="legend-dot legend-dot--women"></i>Femmes <strong id="ratio-femmes-label">0</strong></span>
+              <span><i class="legend-dot legend-dot--men"></i>Hommes <strong id="ratio-hommes-label">0</strong></span>
+            </div>
+          </section>
+
+          <section class="dashboard-panel latest-panel" aria-labelledby="dernier-inscrit-titre">
+            <div>
+              <p class="panel-eyebrow">ACTIVITÉ</p>
+              <h3 id="dernier-inscrit-titre">Dernier inscrit</h3>
+            </div>
+            <strong id="dernier-inscrit" class="latest-name">Aucune inscription</strong>
+            <span id="date-dernier-inscrit" class="latest-date">Le registre est prêt à être complété.</span>
+          </section>
+        </div>
+
+        <section class="directory-section" aria-labelledby="annuaire-titre">
+          <div class="directory-heading">
+            <div>
+              <p class="panel-eyebrow">REGISTRE</p>
+              <h3 id="annuaire-titre">Annuaire familial</h3>
+            </div>
+            <span id="result-count" class="result-count">0 membre</span>
+          </div>
+          <div class="directory-filters">
+            <label class="search-field">
+              <span class="sr-only">Rechercher un membre</span>
+              <input id="recherche-membre" type="search" placeholder="Rechercher un nom, quartier, contact…" autocomplete="off">
+            </label>
+            <label class="filter-field">
+              <span class="sr-only">Filtrer par sexe</span>
+              <select id="filtre-sexe">
+                <option value="">Tous les membres</option>
+                <option value="F">Femmes</option>
+                <option value="M">Hommes</option>
+              </select>
+            </label>
+          </div>
+
+          <p id="aucun-resultat" class="empty-state hidden">Aucun membre ne correspond à cette recherche.</p>
+          <div id="tableau-annuaire" class="directory-table-wrap">
+            <table class="directory-table">
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Sexe</th>
+                  <th>Date de naissance</th>
+                  <th>Contact</th>
+                  <th>Quartier</th>
+                  <th>Profession</th>
+                  <th>Inscrit le</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-membres"></tbody>
+            </table>
+          </div>
+          <div id="liste-membres-mobile" class="directory-mobile-list"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="admin.js" defer></script>
+</body>
+</html>

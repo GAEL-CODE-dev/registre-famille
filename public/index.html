@@ -3,10 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registre de la famille</title>
+  <title>Enregistrement de la famille</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h1>Registre de la famille</h1>
-  <p>Le formulaire d'enregistrement arrive à la phase 2.</p>
+
+<body class="bg-white font-texte text-encre antialiased">
+
+  <header class="border-t-8 border-rouge bg-rouge-pale">
+    <div class="mx-auto max-w-2xl px-5 py-8">
+      <h1 class="font-titre text-3xl leading-tight text-rouge-fonce sm:text-4xl">
+        Enregistrement de la famille
+      </h1>
+      <p class="mt-3 max-w-prose text-neutral-700">
+        Remplis ce formulaire une seule fois. Les champs marqués d'une
+        <span class="font-bold text-rouge">*</span> sont obligatoires.
+      </p>
+      <div class="mt-4">
+        <a href="admin.html" class="admin-back-link">
+          Voir la page admin
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-2xl px-5 py-8">
+
+    <!-- Message de résultat (rempli par le JavaScript à l'étape 4) -->
+    <div id="message" role="status" aria-live="polite" class="mb-6 hidden rounded-lg px-4 py-3 text-sm"></div>
+
+    <!-- Écran de confirmation -->
+    <section id="succes" class="hidden rounded-lg bg-rouge-pale px-6 py-10 text-center">
+      <h2 class="font-titre text-2xl text-rouge-fonce">Enregistrement réussi</h2>
+      <p class="mt-2 text-neutral-700">Merci, tes informations ont bien été enregistrées.</p>
+      <button type="button" id="nouveau"
+              class="mt-6 rounded-lg border border-rouge px-5 py-2.5 font-semibold text-rouge hover:bg-white focus:outline-none focus:ring-2 focus:ring-rouge/40">
+        Enregistrer un autre membre
+      </button>
+    </section>
+
+    <form id="formulaire" novalidate class="space-y-10">
+
+      <!-- Identité -->
+      <fieldset class="space-y-5">
+        <legend class="mb-2 font-titre text-xl text-rouge-fonce">Identité</legend>
+
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div>
+            <label for="nom" class="etiquette">Nom <span class="text-rouge">*</span></label>
+            <input id="nom" name="nom" type="text" maxlength="80" autocomplete="family-name" class="champ" required>
+            <p class="erreur" data-erreur="nom"></p>
+          </div>
+          <div>
+            <label for="prenom" class="etiquette">Prénom <span class="text-rouge">*</span></label>
+            <input id="prenom" name="prenom" type="text" maxlength="80" autocomplete="given-name" class="champ" required>
+            <p class="erreur" data-erreur="prenom"></p>
+          </div>
+        </div>
+
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div>
+            <span class="etiquette">Sexe <span class="text-rouge">*</span></span>
+            <div class="flex gap-6 py-2.5">
+              <label class="flex items-center gap-2">
+                <input type="radio" name="sexe" value="M" class="h-4 w-4 accent-rouge"> Masculin
+              </label>
+              <label class="flex items-center gap-2">
+                <input type="radio" name="sexe" value="F" class="h-4 w-4 accent-rouge"> Féminin
+              </label>
+            </div>
+            <p class="erreur" data-erreur="sexe"></p>
+          </div>
+          <div>
+            <label for="date_naissance" class="etiquette">Date de naissance <span class="text-rouge">*</span></label>
+            <input id="date_naissance" name="date_naissance" type="date" autocomplete="bday" class="champ" required>
+            <p class="erreur" data-erreur="date_naissance"></p>
+          </div>
+        </div>
+      </fieldset>
+
+            <!-- Situation -->
+      <fieldset class="space-y-5">
+        <legend class="mb-2 font-titre text-xl text-rouge-fonce">Situation</legend>
+
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div>
+            <label for="statut_matrimonial" class="etiquette">Statut matrimonial</label>
+            <select id="statut_matrimonial" name="statut_matrimonial" class="champ">
+              <option value="">Choisir…</option>
+              <option value="celibataire">Célibataire</option>
+              <option value="marie">Marié(e)</option>
+              <option value="veuf">Veuf / Veuve</option>
+              <option value="divorce">Divorcé(e)</option>
+            </select>
+            <p class="erreur" data-erreur="statut_matrimonial"></p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Contact -->
+      <fieldset class="space-y-5">
+        <legend class="mb-2 font-titre text-xl text-rouge-fonce">Pour te joindre</legend>
+
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div>
+            <label for="telephone" class="etiquette">Téléphone</label>
+            <input id="telephone" name="telephone" type="tel" maxlength="25" autocomplete="tel" placeholder="+242 06 000 00 00" class="champ">
+            <p class="erreur" data-erreur="telephone"></p>
+          </div>
+          <div>
+            <label for="email" class="etiquette">Adresse e-mail</label>
+            <input id="email" name="email" type="email" maxlength="120" autocomplete="email" class="champ">
+            <p class="erreur" data-erreur="email"></p>
+          </div>
+        </div>
+
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div>
+            <label for="quartier" class="etiquette">Quartier</label>
+            <input id="quartier" name="quartier" type="text" maxlength="120" class="champ">
+            <p class="erreur" data-erreur="quartier"></p>
+          </div>
+          <div>
+            <label for="profession" class="etiquette">Profession</label>
+            <input id="profession" name="profession" type="text" maxlength="120" class="champ">
+            <p class="erreur" data-erreur="profession"></p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Champ piège pour les robots : invisible pour un humain -->
+      <div aria-hidden="true" class="absolute left-[-9999px]">
+        <label>Ne pas remplir <input type="text" name="site_web" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <button type="submit" id="envoyer"
+              class="w-full rounded-lg bg-rouge px-6 py-3 text-lg font-bold text-white hover:bg-rouge-fonce focus:outline-none focus:ring-4 focus:ring-rouge/30 disabled:opacity-60 sm:w-auto">
+        Enregistrer
+      </button>
+    </form>
+  </main>
+
+
+
+<script src="app.js" defer></script>  
 </body>
 </html>

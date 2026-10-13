@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS membres (
   telephone          VARCHAR(25),
   email              VARCHAR(120),
   quartier           VARCHAR(120),
-  lien_famille       VARCHAR(20)  NOT NULL CHECK (lien_famille IN (
+  lien_famille       VARCHAR(20)  CHECK (lien_famille IN (
                        'pere','mere','conjoint','enfant','frere_soeur',
                        'oncle_tante','cousin','grand_parent','autre')),
   statut_matrimonial VARCHAR(20)  CHECK (statut_matrimonial IN (

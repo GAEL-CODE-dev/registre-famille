@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node server.js",
-  "dev": "node --watch server.js",
-  "migrate": "node src/migrate.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node src/migrate.js",
+    "css": "tailwindcss -i ./src/input.css -o ./public/style.css --watch",
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/style.css --minify"
   },
   "keywords": [],
   "author": "",
@@ -21,5 +23,9 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
   }
 }
