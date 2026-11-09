@@ -12,7 +12,13 @@ const refreshButton = document.getElementById('actualiser');
 const logoutButton = document.getElementById('deconnexion');
 const searchInput = document.getElementById('recherche-membre');
 const sexFilter = document.getElementById('filtre-sexe');
+const monthFilter = document.getElementById('filtre-mois');
+const downloadButton = document.getElementById('telecharger-pdf');
 const noResults = document.getElementById('aucun-resultat');
+const NOMS_MOIS = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
 let membres = [];
 
 function afficherErreur(message) {
@@ -27,9 +33,26 @@ function afficherErreurLogin(message) {
 
 function formatDate(dateIso) {
   if (!dateIso) return '—';
+  const correspondance = String(dateIso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (correspondance) {
+    return `${correspondance[3]}/${correspondance[2]}/${correspondance[1]}`;
+  }
   const date = new Date(dateIso);
   if (Number.isNaN(date.getTime())) return String(dateIso);
   return new Intl.DateTimeFormat('fr-FR').format(date);
+}
+
+function moisDeNaissance(dateIso) {
+  if (!dateIso) return null;
+  const correspondance = String(dateIso).match(/^\d{4}-(\d{2})-\d{2}/);
+  if (correspondance) return Number(correspondance[1]);
+  const date = new Date(dateIso);
+  return Number.isNaN(date.getTime()) ? null : date.getMonth() + 1;
+}
+
+function jourDeNaissance(dateIso) {
+  const correspondance = String(dateIso || '').match(/^\d{4}-\d{2}-(\d{2})/);
+  return correspondance ? Number(correspondance[1]) : 0;
 }
 
 function formatDateHeure(dateIso) {
@@ -141,19 +164,83 @@ function rendreMembre(membre) {
 function filtrerMembres() {
   const recherche = searchInput.value.trim().toLocaleLowerCase('fr');
   const sexe = sexFilter.value;
+  const mois = monthFilter.value ? Number(monthFilter.value) : null;
   const filtres = membres.filter((membre) => {
     const champs = [membre.nom, membre.prenom, membre.email, membre.telephone, membre.quartier, membre.profession];
     const correspondRecherche = !recherche || champs.some((champ) => String(champ || '').toLocaleLowerCase('fr').includes(recherche));
-    return correspondRecherche && (!sexe || membre.sexe === sexe);
+    const correspondMois = !mois || moisDeNaissance(membre.date_naissance) === mois;
+    return correspondRecherche && (!sexe || membre.sexe === sexe) && correspondMois;
   });
+
+  if (mois) {
+    filtres.sort((a, b) => jourDeNaissance(a.date_naissance) - jourDeNaissance(b.date_naissance));
+  }
 
   document.getElementById('result-count').textContent = `${filtres.length} ${filtres.length === 1 ? 'membre' : 'membres'}`;
   noResults.classList.toggle('hidden', filtres.length > 0);
-  noResults.textContent = membres.length ? 'Aucun membre ne correspond à cette recherche.' : 'Aucun membre n’est encore inscrit.';
+  if (mois) {
+    noResults.textContent = `Aucun anniversaire en ${NOMS_MOIS[mois - 1].toLowerCase()}.`;
+  } else {
+    noResults.textContent = membres.length ? 'Aucun membre ne correspond à cette recherche.' : 'Aucun membre n’est encore inscrit.';
+  }
   tableWrap.classList.toggle('hidden', filtres.length === 0);
   mobileList.classList.toggle('hidden', filtres.length === 0);
+  if (downloadButton) downloadButton.disabled = filtres.length === 0;
   tbody.innerHTML = filtres.map((membre) => rendreMembre(membre).ligne).join('');
   mobileList.innerHTML = filtres.map((membre) => rendreMembre(membre).carte).join('');
+}
+
+async function telechargerPDF() {
+  const token = getToken();
+  if (!token) {
+    setAuthState(null);
+    return;
+  }
+
+  const params = new URLSearchParams();
+  if (monthFilter.value) params.set('mois', monthFilter.value);
+  if (sexFilter.value) params.set('sexe', sexFilter.value);
+  if (searchInput.value.trim()) params.set('q', searchInput.value.trim());
+  const url = `/api/membres/anniversaires/pdf${params.toString() ? `?${params.toString()}` : ''}`;
+
+  const texteOriginal = downloadButton.textContent;
+  downloadButton.disabled = true;
+  downloadButton.textContent = 'Génération…';
+
+  try {
+    const reponse = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (reponse.status === 401) {
+      setAuthState(null);
+      afficherErreurLogin('Session invalide. Reconnectez-vous.');
+      return;
+    }
+
+    if (!reponse.ok) {
+      throw new Error('Impossible de générer le PDF.');
+    }
+
+    const blob = await reponse.blob();
+    const nomFichier = monthFilter.value
+      ? `anniversaires-${String(monthFilter.value).padStart(2, '0')}.pdf`
+      : 'anniversaires-registre.pdf';
+    const lien = document.createElement('a');
+    const urlBlob = URL.createObjectURL(blob);
+    lien.href = urlBlob;
+    lien.download = nomFichier;
+    document.body.appendChild(lien);
+    lien.click();
+    lien.remove();
+    URL.revokeObjectURL(urlBlob);
+  } catch (err) {
+    afficherErreur(err.message || 'Erreur lors de la génération du PDF.');
+  } finally {
+    downloadButton.textContent = texteOriginal;
+    downloadButton.disabled = false;
+    filtrerMembres();
+  }
 }
 
 async function chargerMembres() {
@@ -225,6 +312,8 @@ loginForm.addEventListener('submit', async (event) => {
 
 searchInput.addEventListener('input', filtrerMembres);
 sexFilter.addEventListener('change', filtrerMembres);
+monthFilter.addEventListener('change', filtrerMembres);
+downloadButton.addEventListener('click', telechargerPDF);
 refreshButton.addEventListener('click', chargerMembres);
 logoutButton.addEventListener('click', () => setAuthState(null));
 
